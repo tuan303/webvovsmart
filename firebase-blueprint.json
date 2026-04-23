@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "An industrial smart product",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the product"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category: Inverter, Servo, Sensor, SmartHome"
+        },
+        "code": {
+          "type": "string",
+          "description": "Product code e.g., IS-INV-2024-X1"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Image URL for the product"
+        },
+        "isNew": {
+          "type": "boolean",
+          "description": "Is this a new product?"
+        },
+        "inStock": {
+          "type": "boolean",
+          "description": "Is this product in stock?"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["name", "category", "code", "imageUrl"]
+    },
+    "News": {
+      "title": "News",
+      "description": "News article or tech update",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "excerpt": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "number"
+        },
+        "updatedAt": {
+          "type": "number"
+        }
+      },
+      "required": ["title", "category", "excerpt", "imageUrl"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Collection of products"
+    },
+    "/news/{newsId}": {
+      "schema": {
+        "$ref": "#/entities/News"
+      },
+      "description": "Collection of news articles"
+    }
+  }
+}

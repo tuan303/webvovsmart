@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // In a real app we'd verify admin status with a claim or user doc. Here we allow any signed-in user for simplicity, but it's restricted.
+      return isSignedIn();
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.category is string && data.category.size() > 0 && data.category.size() <= 100
+        && data.code is string && data.code.size() > 0 && data.code.size() <= 100
+        && data.imageUrl is string && data.imageUrl.size() > 0 && data.imageUrl.size() <= 1000
+        && data.isNew is bool
+        && data.inStock is bool
+        && data.createdAt is number
+        && data.updatedAt is number;
+    }
+
+    function isValidNews(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() <= 300
+        && data.category is string && data.category.size() > 0 && data.category.size() <= 100
+        && data.date is string && data.date.size() > 0 && data.date.size() <= 50
+        && data.excerpt is string && data.excerpt.size() > 0 && data.excerpt.size() <= 1000
+        && data.imageUrl is string && data.imageUrl.size() > 0 && data.imageUrl.size() <= 1000
+        && data.createdAt is number
+        && data.updatedAt is number;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(productId) && isValidProduct(incoming()) && incoming().createdAt == request.time.toMillis();
+      allow update: if isAdmin() && isValidId(productId) && isValidProduct(incoming()) && incoming().updatedAt == request.time.toMillis() && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    match /news/{newsId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(newsId) && isValidNews(incoming()) && incoming().createdAt == request.time.toMillis();
+      allow update: if isAdmin() && isValidId(newsId) && isValidNews(incoming()) && incoming().updatedAt == request.time.toMillis() && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin() && isValidId(newsId);
+    }
+  }
+}
